@@ -4,48 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Code Obfuscator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        #textbox {
+            width: 300px;
+            height: 100px;
+            margin-bottom: 20px;
+        }
+        #redButton {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #redButton:hover {
+            background-color: darkred;
+        }
+    </style>
 </head>
 <body>
-    <h1>Code Obfuscator</h1>
-    <textarea id="codeInput" rows="10" cols="50" placeholder="Enter your code here..."></textarea>
-    <br>
-    <button id="obfuscateButton" style="background-color: red; color: white; padding: 10px 20px; border: none; cursor: pointer;">Obfuscate Code</button>
+    <textarea id="textbox" placeholder="Type your code here..."></textarea><br>
+    <button id="redButton">Obfuscate Code</button>
 
     <script>
-        document.getElementById("obfuscateButton").addEventListener("click", function () {
-            let inputCode = document.getElementById("codeInput").value;
+        document.getElementById('redButton').addEventListener('click', function() {
+            const textbox = document.getElementById('textbox');
+            const inputCode = textbox.value;
             
             if (!inputCode.trim()) {
-                alert("Please enter some code to obfuscate.");
+                alert("Please enter some code.");
                 return;
             }
 
-            let keywords = ["return", "end", "break", "then", "if", "not"];
-            let obfuscatedCode = "";
-            let lines = inputCode.split("\\n");
+            const keywords = ["return", "end", "break", "then", "if", "not"];
+            let obfuscatedCode = '';
+            let counter = 0;
 
-            lines.forEach((line, index) => {
-                // Create variables named v0, v1, v2...
-                let variableName = `v${index}`;
-                
-                // Convert line to ASCII code and add some real code obfuscation
-                let asciiLine = line
-                    .split("")
-                    .map(char => char.charCodeAt(0))
-                    .join(" ");
+            // Split input code into lines and process each line
+            inputCode.split('\n').forEach(line => {
+                let variableName = `v${counter++}`;
+                let obfuscatedLine = `${variableName} = "${line.replace(/"/g, '\\"')}";`;
 
-                // Add keywords randomly into the obfuscated code
-                let keyword = keywords[Math.floor(Math.random() * keywords.length)];
+                // Randomly append a keyword or ASCII number
+                if (Math.random() > 0.5) {
+                    const keyword = keywords[Math.floor(Math.random() * keywords.length)];
+                    obfuscatedLine += ` // ${keyword}`;
+                } else {
+                    obfuscatedLine += ` // ASCII(${line.length})`;
+                }
 
-                // Combine elements into one line
-                obfuscatedCode += `${variableName}="${asciiLine}";${keyword};`;
+                obfuscatedCode += obfuscatedLine + ' ';
             });
 
-            // Create a downloadable text file
-            let blob = new Blob([obfuscatedCode], { type: "text/plain" });
-            let downloadLink = document.createElement("a");
+            // Download the obfuscated code
+            const blob = new Blob([obfuscatedCode], { type: 'text/plain' });
+            const downloadLink = document.createElement('a');
             downloadLink.href = URL.createObjectURL(blob);
-            downloadLink.download = "obfuscated_code.txt";
+            downloadLink.download = 'obfuscated_code.txt';
             downloadLink.click();
         });
     </script>
