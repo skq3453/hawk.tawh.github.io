@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obfuscator</title>
+</head>
+<body>
+    <h1>Code Obfuscator</h1>
+    <textarea id="codeInput" placeholder="Type your code here..." rows="10" cols="50"></textarea>
+    <br>
+    <button id="processButton" style="background-color: red; color: white; padding: 10px;">Obfuscate Code</button>
+
+    <script>
+        document.getElementById('processButton').addEventListener('click', function() {
+            const inputCode = document.getElementById('codeInput').value;
+            if (!inputCode) {
+                alert("Please enter some code to obfuscate.");
+                return;
+            }
+
+            // Step 1: Generate variable names
+            const keywords = ["return", "end", "break", "then", "if", "not"];
+            let obfuscatedVariables = [];
+            let result = "";
+            let variableCounter = 0;
+
+            // Step 2: Split input into lines and obfuscate each line
+            const lines = inputCode.split("\n");
+            for (const line of lines) {
+                let obfuscatedLine = "";
+                for (const word of line.split(" ")) {
+                    if (keywords.includes(word)) {
+                        obfuscatedLine += `"${word}" `;
+                    } else {
+                        const obfuscatedVar = `v${variableCounter}`;
+                        obfuscatedVariables.push(obfuscatedVar);
+                        variableCounter++;
+                        obfuscatedLine += `"${obfuscatedVar}" `;
+                    }
+                }
+                result += obfuscatedLine.trim() + " ";
+            }
+
+            // Step 3: Add ASCII representation for part of the real code
+            let asciiInjected = result.split(" ").map((word, index) => {
+                if (index % 3 === 0) {
+                    return word.split("").map(char => char.charCodeAt(0)).join("-");
+                }
+                return word;
+            }).join(" ");
+
+            // Step 4: Download the obfuscated code
+            const blob = new Blob([asciiInjected], { type: "text/plain" });
+            const downloadLink = document.createElement("a");
+            downloadLink.href = URL.createObjectURL(blob);
+            downloadLink.download = "obfuscated_code.txt";
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        });
+    </script>
+</body>
+</html>
