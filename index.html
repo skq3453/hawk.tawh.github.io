@@ -3,61 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Obfuscator</title>
+    <title>Code Obfuscator</title>
 </head>
 <body>
     <h1>Code Obfuscator</h1>
-    <textarea id="codeInput" placeholder="Type your code here..." rows="10" cols="50"></textarea>
+    <textarea id="codeInput" rows="10" cols="50" placeholder="Enter your code here..."></textarea>
     <br>
-    <button id="processButton" style="background-color: red; color: white; padding: 10px;">Obfuscate Code</button>
+    <button id="obfuscateButton" style="background-color: red; color: white; padding: 10px 20px; border: none; cursor: pointer;">Obfuscate Code</button>
 
     <script>
-        document.getElementById('processButton').addEventListener('click', function() {
-            const inputCode = document.getElementById('codeInput').value;
-            if (!inputCode) {
+        document.getElementById("obfuscateButton").addEventListener("click", function () {
+            let inputCode = document.getElementById("codeInput").value;
+            
+            if (!inputCode.trim()) {
                 alert("Please enter some code to obfuscate.");
                 return;
             }
 
-            // Step 1: Generate variable names
-            const keywords = ["return", "end", "break", "then", "if", "not"];
-            let obfuscatedVariables = [];
-            let result = "";
-            let variableCounter = 0;
+            let keywords = ["return", "end", "break", "then", "if", "not"];
+            let obfuscatedCode = "";
+            let lines = inputCode.split("\\n");
 
-            // Step 2: Split input into lines and obfuscate each line
-            const lines = inputCode.split("\n");
-            for (const line of lines) {
-                let obfuscatedLine = "";
-                for (const word of line.split(" ")) {
-                    if (keywords.includes(word)) {
-                        obfuscatedLine += `"${word}" `;
-                    } else {
-                        const obfuscatedVar = `v${variableCounter}`;
-                        obfuscatedVariables.push(obfuscatedVar);
-                        variableCounter++;
-                        obfuscatedLine += `"${obfuscatedVar}" `;
-                    }
-                }
-                result += obfuscatedLine.trim() + " ";
-            }
+            lines.forEach((line, index) => {
+                // Create variables named v0, v1, v2...
+                let variableName = `v${index}`;
+                
+                // Convert line to ASCII code and add some real code obfuscation
+                let asciiLine = line
+                    .split("")
+                    .map(char => char.charCodeAt(0))
+                    .join(" ");
 
-            // Step 3: Add ASCII representation for part of the real code
-            let asciiInjected = result.split(" ").map((word, index) => {
-                if (index % 3 === 0) {
-                    return word.split("").map(char => char.charCodeAt(0)).join("-");
-                }
-                return word;
-            }).join(" ");
+                // Add keywords randomly into the obfuscated code
+                let keyword = keywords[Math.floor(Math.random() * keywords.length)];
 
-            // Step 4: Download the obfuscated code
-            const blob = new Blob([asciiInjected], { type: "text/plain" });
-            const downloadLink = document.createElement("a");
+                // Combine elements into one line
+                obfuscatedCode += `${variableName}="${asciiLine}";${keyword};`;
+            });
+
+            // Create a downloadable text file
+            let blob = new Blob([obfuscatedCode], { type: "text/plain" });
+            let downloadLink = document.createElement("a");
             downloadLink.href = URL.createObjectURL(blob);
             downloadLink.download = "obfuscated_code.txt";
-            document.body.appendChild(downloadLink);
             downloadLink.click();
-            document.body.removeChild(downloadLink);
         });
     </script>
 </body>
