@@ -9,71 +9,63 @@
             font-family: Arial, sans-serif;
             margin: 20px;
         }
-        #generateBtn {
+        .textbox {
+            width: 80%;
+            height: 30px;
+            margin-bottom: 10px;
+        }
+        .red-button {
             background-color: red;
             color: white;
             border: none;
             padding: 10px 20px;
-            font-size: 16px;
             cursor: pointer;
-        }
-        #generateBtn:hover {
-            background-color: darkred;
         }
     </style>
 </head>
 <body>
     <h1>Code Obfuscator</h1>
-    <p>Enter your code below:</p>
-    <textarea id="codeInput" rows="10" cols="50" placeholder="Type your code here..."></textarea>
-    <br><br>
-    <button id="generateBtn">Generate Obfuscated Code</button>
+    <textarea id="codeInput" class="textbox" placeholder="Type your code here..."></textarea><br>
+    <button class="red-button" onclick="obfuscateCode()">Obfuscate and Download</button>
 
     <script>
-        document.getElementById("generateBtn").addEventListener("click", function () {
-            const inputCode = document.getElementById("codeInput").value;
-
-            if (!inputCode) {
+        function obfuscateCode() {
+            let code = document.getElementById("codeInput").value;
+            if (!code.trim()) {
                 alert("Please enter some code to obfuscate.");
                 return;
             }
 
-            let variables = [];
-            let variableCounter = 0;
-            let obfuscatedCode = "";
+            let keywords = ["return", "end", "break", "then", "if", "not"];
+            let variables = {};
+            let varCounter = 0;
 
-            const keywords = ["return", "end", "break", "then", "if", "not"];
-            
-            // Generate variables
-            inputCode.split(/\s+/).forEach(word => {
-                if (!variables.includes(word)) {
-                    let newVar = "v" + variableCounter++;
-                    variables.push({ original: word, obfuscated: newVar });
+            // Replace variables with obfuscated names (v0, v1, ...)
+            code = code.replace(/\b[a-zA-Z_]\w*\b/g, function(match) {
+                if (keywords.includes(match)) return match;
+                if (!variables[match]) {
+                    variables[match] = `v${varCounter++}`;
                 }
+                return variables[match];
             });
 
-            // Replace keywords with ASCII or obfuscated text
-            inputCode.split(/\s+/).forEach(word => {
-                let replacement = word;
-                if (keywords.includes(word)) {
-                    replacement = word.split("").map(char => char.charCodeAt(0)).join("_");
-                } else {
-                    const varMapping = variables.find(v => v.original === word);
-                    if (varMapping) replacement = varMapping.obfuscated;
-                }
-                obfuscatedCode += replacement + " ";
+            // Convert parts of the code to ASCII representations
+            let obfuscatedCode = code.replace(/./g, char => {
+                return Math.random() > 0.7
+                    ? `String.fromCharCode(${char.charCodeAt(0)})`
+                    : char;
             });
 
-            // Convert obfuscated code to a single line
-            obfuscatedCode = obfuscatedCode.trim().replace(/\s+/g, " ");
+            // Flatten to a single line
+            obfuscatedCode = obfuscatedCode.split("\n").join("");
 
-            // Create and download the file
-            const blob = new Blob([obfuscatedCode], { type: "text/plain" });
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = "obfuscated_code.txt";
-            a.click();
-        });
+            // Create a downloadable file
+            let blob = new Blob([obfuscatedCode], { type: "text/plain" });
+            let link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "obfuscated_code.txt";
+            link.click();
+        }
     </script>
 </body>
 </html>
